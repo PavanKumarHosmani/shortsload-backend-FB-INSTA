@@ -1,32 +1,31 @@
-# Lightweight Node.js image
+# ✅ Lightweight and fully working Node.js + yt-dlp + ffmpeg setup
 FROM node:20-slim
 
-# Avoid prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install yt-dlp + ffmpeg
+# Install Python (full), ffmpeg, and yt-dlp (static binary)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        python3-minimal \
+        python3 \
         ffmpeg \
         ca-certificates \
         curl && \
-    curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp && \
+    curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux -o /usr/local/bin/yt-dlp && \
     chmod a+rx /usr/local/bin/yt-dlp && \
     rm -rf /var/lib/apt/lists/*
 
-# App directory
+# Set workdir
 WORKDIR /app
 
-# Install deps
+# Copy package files first (better caching)
 COPY package*.json ./
 RUN npm install --omit=dev
 
-# Copy app files
+# Copy app source
 COPY . .
 
-# Expose backend port
+# Expose your API port
 EXPOSE 8080
 
-# Start app
+# Start server
 CMD ["npm", "start"]
